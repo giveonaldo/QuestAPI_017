@@ -1,0 +1,16 @@
+<resources>
+    <string name="btn_submit">Masukan</string>
+    <string name="btn_hapus">Hapus</string>
+    <string name="btn_edit">Edit</string>
+    <string name="detail_siswa">Detail Siswa</string>
+    <string name="edit_siswa">Edit Siswa</string>
+    <string name="yes">Ya</string>
+    <string name="no">Tidak</string>
+    <string name="app_name">Rest-API</string>
+    <string name="retry">Coba lagi</string>
+    <string name="failed">Gagal Loading</string>
+    <string name="loading">Menunggu..</string>
+    <string name="attention">Perhatian</string>
+    <string name="tanya">Hapus Data?</string>
+    <string name="deskripsi_no_item">Tidak ada siswa??</string>
+</resources>
