@@ -17,7 +17,6 @@ import com.pam.rest_api.uicontroller.DataSiswaApp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             RestAPITheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

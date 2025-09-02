@@ -124,7 +124,7 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
         Button(
             onClick = retryAction
         ) {
-            Text("Submit")
+            Text("Coba")
         }
     }
 }
