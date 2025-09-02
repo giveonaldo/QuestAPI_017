@@ -59,11 +59,16 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // ViewModel
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)
+    // Navigasi
     implementation(libs.navigation.compose)
+    // Serialization
     implementation(libs.retrofit.serialization)
     implementation(libs.kotlinx.serialization.json)
+    // Komunikasi http json
     implementation(libs.okhttp)
+    // Catatan request http
     implementation(libs.okhttp.logging)
 }
