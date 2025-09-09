@@ -30,18 +30,22 @@ fun HostNavigasi(
     NavHost(navController = navController, startDestination = DestinasiHome.route,
         modifier = Modifier) {
         composable(DestinasiHome.route) {
-            HomeScreen(navigateToItemEntry = {navController.navigate(DestinasiEntry.route)})
+            HomeScreen(navigateToItemEntry = {navController.navigate(DestinasiEntry.route)},
+                navigateToDetail = { itemId ->
+                    navController.navigate("${DestinasiDetail.route}/$itemId")
+                }
+            )
         }
 
         composable(DestinasiEntry.route) {
-            EntrySiswaScreen(navigateBack = {navController.navigate(DestinasiHome.route)})
+            EntrySiswaScreen(navigateBack = { navController.popBackStack() })
         }
 
         composable(DestinasiDetail.routeWithArgs, arguments = listOf(navArgument(DestinasiDetail.itemIdArg) {
             type = NavType.IntType
         })) {
             DetailSiwaScreen(navigateToEditItem = {navController.navigate("${DestinasiEdit.route}/$it")},
-                navigateBack = { navController.navigate(DestinasiHome.route) })
+                navigateBack = { navController.popBackStack() })
         }
     }
 }
