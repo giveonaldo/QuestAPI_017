@@ -4,6 +4,7 @@ package com.pam.rest_api.view
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -142,15 +143,28 @@ fun DaftarSiswa(
     modifier: Modifier = Modifier,
     onItemClick: (DataSiswa) -> Unit
 ) {
-    // PERBAIKAN KECIL: Terapkan modifier ke LazyColumn
-    LazyColumn(modifier = modifier) {
-        items(items = itemSiswa, key = { it.id }) { person ->
-            ItemSiswa(
-                siswa = person,
-                // Beri padding untuk setiap item di sini
-                modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
-                onClick = { onItemClick(person) }
+    if (itemSiswa.isEmpty()) {
+        // 2. Jika kosong, tampilkan teks di tengah
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Tidak ada data siswa.",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium
             )
+        }
+    } else {
+        // 3. Jika ada data, tampilkan daftar seperti biasa
+        LazyColumn(modifier = modifier) {
+            items(items = itemSiswa, key = { it.id }) { person ->
+                ItemSiswa(
+                    siswa = person,
+                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
+                    onClick = { onItemClick(person) }
+                )
+            }
         }
     }
 }
