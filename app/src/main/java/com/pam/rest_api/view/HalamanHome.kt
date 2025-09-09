@@ -2,6 +2,7 @@ package com.pam.rest_api.view
 
 // ... (semua import tetap sama)
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,7 +50,8 @@ import com.pam.rest_api.viewmodel.StatusUiSiswa
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = PenyediaViewModel.Factory),
-    navigateToItemEntry: () -> Unit
+    navigateToItemEntry: () -> Unit,
+    navigateToDetail: (Int) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -83,7 +85,8 @@ fun HomeScreen(
             retryAction = viewModel::loadSiswa,
             modifier = modifier
                 .padding(innerPadding)
-                .fillMaxSize()
+                .fillMaxSize(),
+            onItemClick = { navigateToDetail(it.id) }
         )
     }
 }
@@ -92,13 +95,15 @@ fun HomeScreen(
 fun HomeBody(
     statusUiSiswa: StatusUiSiswa,
     retryAction: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onItemClick: (DataSiswa) -> Unit
 ) {
     when (statusUiSiswa) {
         is StatusUiSiswa.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
         is StatusUiSiswa.Success -> DaftarSiswa(
             itemSiswa = statusUiSiswa.siswa,
-            modifier = modifier
+            modifier = modifier,
+            onItemClick = onItemClick
         )
         // Pastikan modifier diteruskan ke ErrorScreen
         is StatusUiSiswa.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
@@ -106,7 +111,7 @@ fun HomeBody(
 }
 
 @Composable
-fun LoadingScreen(modifier: Modifier = Modifier) {
+public fun LoadingScreen(modifier: Modifier = Modifier) {
     // Menggunakan CircularProgressIndicator lebih umum untuk status loading
     Column(
         modifier = modifier,
@@ -118,7 +123,7 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
+public fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -134,7 +139,8 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 fun DaftarSiswa(
     itemSiswa: List<DataSiswa>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onItemClick: (DataSiswa) -> Unit
 ) {
     // PERBAIKAN KECIL: Terapkan modifier ke LazyColumn
     LazyColumn(modifier = modifier) {
@@ -142,7 +148,8 @@ fun DaftarSiswa(
             ItemSiswa(
                 siswa = person,
                 // Beri padding untuk setiap item di sini
-                modifier = Modifier.padding(dimensionResource(R.dimen.padding_small))
+                modifier = Modifier.padding(dimensionResource(R.dimen.padding_small)),
+                onClick = { onItemClick(person) }
             )
         }
     }
@@ -151,10 +158,11 @@ fun DaftarSiswa(
 @Composable
 fun ItemSiswa(
     siswa: DataSiswa,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
