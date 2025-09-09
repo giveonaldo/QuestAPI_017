@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -38,10 +39,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pam.rest_api.R
 import com.pam.rest_api.modeldata.DataSiswa
 import com.pam.rest_api.uicontroller.route.DestinasiDetail
+import com.pam.rest_api.viewmodel.DetailViewModel
 import com.pam.rest_api.viewmodel.PenyediaViewModel
+import com.pam.rest_api.viewmodel.StatusUIDetail
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class.java)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailSiwaScreen(
     navigateToEditItem: (Int) -> Unit,
@@ -51,7 +54,7 @@ fun DetailSiwaScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
+            SiswaTopAppBar(
                 title = stringResource(DestinasiDetail.titleRes),
                 canNavigateBack = true,
                 navigateUp = navigateBack
@@ -84,7 +87,7 @@ fun DetailSiwaScreen(
             }},
             modifier = Modifier
                 .padding(innerPadding)
-                .verticalScroll(remeberScrollState())
+                .verticalScroll(rememberScrollState())
         )
     }
 }
