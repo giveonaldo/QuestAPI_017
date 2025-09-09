@@ -1,5 +1,6 @@
 package com.pam.rest_api.view
 
+// ... (semua import tetap sama)
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,71 +18,72 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator // Lebih baik untuk loading
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pam.rest_api.R
 import com.pam.rest_api.modeldata.DataSiswa
-import com.pam.rest_api.uicontroller.DestinasiNavigasi
+import com.pam.rest_api.uicontroller.route.DestinasiHome
 import com.pam.rest_api.viewmodel.HomeViewModel
 import com.pam.rest_api.viewmodel.PenyediaViewModel
 import com.pam.rest_api.viewmodel.StatusUiSiswa
 
-object DestinasiHome: DestinasiNavigasi {
-    override val route = "home"
-    override val titleRes = R.string.app_name
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel(factory = PenyediaViewModel.Factory)
+    viewModel: HomeViewModel = viewModel(factory = PenyediaViewModel.Factory),
+    navigateToItemEntry: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.app_name), color = Color.White) },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(colorResource(R.color.purple_700)),
+            SiswaTopAppBar(
+                title = stringResource(DestinasiHome.titleRes),
+                canNavigateBack = false,
                 scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {},
+                onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(dimensionResource(R.dimen.padding_large))
-            ) {
+                modifier = Modifier.padding(dimensionResource(R.dimen.padding_large)),
+
+                ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Tambah"
+                    contentDescription = "Tambah Siswa"
                 )
             }
         }
     ) { innerPadding ->
         HomeBody(
+            // Di ViewModel, nama propertinya mungkin siswaUiState atau semacamnya
             statusUiSiswa = viewModel.listSiswa,
-            retryAction = { viewModel.listSiswa },
-            modifier = modifier.padding(innerPadding).fillMaxSize()
+            // PERBAIKAN UTAMA: Panggil fungsi untuk mengambil data lagi
+            retryAction = viewModel::loadSiswa,
+            modifier = modifier
+                .padding(innerPadding)
+                .fillMaxSize()
         )
     }
 }
@@ -92,23 +94,27 @@ fun HomeBody(
     retryAction: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when(statusUiSiswa) {
-        is StatusUiSiswa.Loading -> LoadingScreen()
-        is StatusUiSiswa.Success -> DaftarSiswa(itemSiswa = statusUiSiswa.siswa)
-        is StatusUiSiswa.Error -> ErrorScreen(
-            retryAction,
-            modifier = modifier.fillMaxSize()
+    when (statusUiSiswa) {
+        is StatusUiSiswa.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
+        is StatusUiSiswa.Success -> DaftarSiswa(
+            itemSiswa = statusUiSiswa.siswa,
+            modifier = modifier
         )
+        // Pastikan modifier diteruskan ke ErrorScreen
+        is StatusUiSiswa.Error -> ErrorScreen(retryAction, modifier = modifier.fillMaxSize())
     }
 }
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
-    Image(
-        modifier = modifier.size(200.dp),
-        painter = painterResource(R.drawable.ic_launcher_background),
-        contentDescription = ""
-    )
+    // Menggunakan CircularProgressIndicator lebih umum untuk status loading
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator()
+    }
 }
 
 @Composable
@@ -118,13 +124,9 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Gagal"
-        )
-        Button(
-            onClick = retryAction
-        ) {
-            Text("Coba")
+        Text(text = "Gagal Memuat Data")
+        Button(onClick = retryAction) {
+            Text("Coba Lagi")
         }
     }
 }
@@ -133,13 +135,14 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 fun DaftarSiswa(
     itemSiswa: List<DataSiswa>,
     modifier: Modifier = Modifier
-){
-    LazyColumn(modifier = Modifier) {
-        items(items = itemSiswa, key = {it.id}) {
-                person ->
+) {
+    // PERBAIKAN KECIL: Terapkan modifier ke LazyColumn
+    LazyColumn(modifier = modifier) {
+        items(items = itemSiswa, key = { it.id }) { person ->
             ItemSiswa(
                 siswa = person,
-                modifier = modifier.padding(dimensionResource(R.dimen.padding_small))
+                // Beri padding untuk setiap item di sini
+                modifier = Modifier.padding(dimensionResource(R.dimen.padding_small))
             )
         }
     }
@@ -168,7 +171,8 @@ fun ItemSiswa(
                 Spacer(Modifier.weight(1f))
                 Icon(
                     imageVector = Icons.Default.Phone,
-                    contentDescription = null
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = dimensionResource(id = R.dimen.padding_small))
                 )
                 Text(
                     text = siswa.telpon,

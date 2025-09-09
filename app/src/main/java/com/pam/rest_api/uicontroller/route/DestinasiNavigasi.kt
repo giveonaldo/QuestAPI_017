@@ -1,4 +1,4 @@
-package com.pam.rest_api.uicontroller
+package com.pam.rest_api.uicontroller.route
 
 interface DestinasiNavigasi {
     val route: String

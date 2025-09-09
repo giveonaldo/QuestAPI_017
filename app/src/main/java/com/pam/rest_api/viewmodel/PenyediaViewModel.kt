@@ -12,5 +12,6 @@ fun CreationExtras.aplikasiDataSiswa(): AplikasiDataSiswa = (
 object PenyediaViewModel {
     val Factory = viewModelFactory {
         initializer { HomeViewModel(aplikasiDataSiswa().container.repositoryDatasiswa) }
+        initializer { EntryViewModel(aplikasiDataSiswa().container.repositoryDatasiswa) }
     }
 }
