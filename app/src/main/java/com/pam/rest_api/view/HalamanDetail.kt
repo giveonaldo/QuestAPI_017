@@ -103,20 +103,31 @@ private fun BodyDetailDataSiswa(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium))
     ) {
         var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
-        when(statusUIDetail) {
-            is StatusUIDetail.Success -> DetailDataSiswa(
-                siswa = statusUIDetail.satusiswa,
-                modifier = Modifier.fillMaxWidth())
-            else -> {}
+        when (statusUIDetail) {
+            is StatusUIDetail.Loading -> {
+                // Tampilkan indikator loading saat data diambil
+                LoadingScreen(modifier = Modifier.fillMaxWidth())
+            }
+            is StatusUIDetail.Success -> {
+                // Tampilkan data jika berhasil
+                DetailDataSiswa(
+                    siswa = statusUIDetail.satusiswa,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                // Tombol hapus hanya muncul jika data ada
+                OutlinedButton(
+                    onClick = { deleteConfirmationRequired = true },
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.btn_hapus))
+                }
+            }
+            is StatusUIDetail.Error -> {
+                // Tampilkan pesan error jika gagal
+                ErrorScreen(modifier = Modifier.fillMaxWidth(), retryAction = {})
+            }
         }
-        OutlinedButton(
-            onClick = { deleteConfirmationRequired = true },
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.btn_hapus))
-        }
-
         if (deleteConfirmationRequired) {
             DeleteConfirmationDialog(
                 onDeleteConfirm = {
