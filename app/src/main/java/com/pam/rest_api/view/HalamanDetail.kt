@@ -1,24 +1,38 @@
 package com.pam.rest_api.view
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pam.rest_api.R
+import com.pam.rest_api.modeldata.DataSiswa
 import com.pam.rest_api.uicontroller.route.DestinasiDetail
 import com.pam.rest_api.viewmodel.PenyediaViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class.java)
 @Composable
@@ -55,9 +69,96 @@ fun DetailSiwaScreen(
         }, modifier = modifier
     ) { innerPadding ->
         val coroutineScope = rememberCoroutineScope()
-
+        BodyDetailDataSiswa(
+            statusUIDetail = viewModel.statusUIDetail,
+            onDelete = { coroutineScope.launch {
+                viewModel.hapusSatuSiswa()
+                navigateBack()
+            }},
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(remeberScrollState())
+        )
     }
 }
 
 @Composable
-private fun BodyDetailDataSiswa() {}
+private fun BodyDetailDataSiswa(
+    statusUIDetail: StatusUIDetail,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(dimensionResource(R.dimen.padding_medium)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium))
+    ) {
+        var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
+        when(statusUIDetail) {
+            is StatusUIDetail.Success -> DetailDataSiswa(
+                siswa = statusUIDetail.satusiswa,
+                modifier = Modifier.fillMaxWidth())
+            else -> {}
+        }
+        OutlinedButton(
+            onClick = { deleteConfirmationRequired = true },
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.btn_hapus))
+        }
+
+        if (deleteConfirmationRequired) {
+            DeleteConfirmationDialog(
+                onDeleteConfirm = {
+                    deleteConfirmationRequired = false
+                    onDelete()
+                },
+                onDeleteCancel = { deleteConfirmationRequired = false },
+                modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
+            )
+        }
+    }
+}
+
+@Composable
+fun DetailDataSiswa(
+    siswa: DataSiswa,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(dimensionResource(R.dimen.padding_medium)),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_medium))
+        ) {
+            BarisDetailData(
+                labelResID = R.string.nama,
+                itemDetail = siswa.nama,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(R.dimen.padding_medium)
+                )
+            )
+            BarisDetailData(
+                labelResID = R.string.alamat,
+                itemDetail = siswa.alamat,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(R.dimen.padding_medium)
+                )
+            )
+            BarisDetailData(
+                labelResID = R.string.telpon,
+                itemDetail = siswa.telpon,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(R.dimen.padding_medium)
+                )
+            )
+        }
+    }
+}
